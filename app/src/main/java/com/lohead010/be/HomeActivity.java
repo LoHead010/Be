@@ -1,168 +1,208 @@
 package com.lohead010.be;
 
-import android.annotation.SuppressLint;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import android.app.Activity;
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Typeface;
+import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.os.Handler;
-import android.view.MotionEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
+import java.lang.String;
+import java.util.List;
+import java.util.ArrayList;
 
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- */
-public class HomeActivity extends AppCompatActivity {
-    /**
-     * Whether or not the system UI should be auto-hidden after
-     * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
-     */
-    private static final boolean AUTO_HIDE = true;
+import android.widget.Toast;
+import android.content.Context;
 
-    /**
-     * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
-     * user interaction before hiding the system UI.
-     */
-    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
 
-    /**
-     * Some older devices needs a small delay between UI widget updates
-     * and a change of the status and navigation bar.
-     */
-    private static final int UI_ANIMATION_DELAY = 300;
-
-    private View mContentView;
-    private View mControlsView;
-    private boolean mVisible;
-
+public class HomeActivity extends Activity {
+    public List<Words> verbs = new ArrayList<Words>();
+    int min = 0;
+    int max = 5;
+    int count = 0;
+    String result = "";
+    //int idex = (int) (Math.random() * ((max - min) + 1));
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
 
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        mVisible = true;
-        mControlsView = findViewById(R.id.fullscreen_content_controls);
-        mContentView = findViewById(R.id.fullscreen_content);
+        try {
+            final MySQLiteHelper db = new MySQLiteHelper(this);
+            db.deleteAllRecords();
+
+            addVerb(db);
+            // final TextView tvWord = (TextView)findViewById(R.id.tvResults);
+            final TextView tvBe = (TextView) findViewById(R.id.tvBe);
+            tvBe.setOnClickListener(new View.OnClickListener() {
 
 
-        // Set up the user interaction to manually show or hide the system UI.
-        mContentView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toggle();
-            }
-        });
+                int idex = (int) (Math.random() * ((max - min) + 1));
+                @Override
+                public void onClick(View v) {
 
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+
+
+                    final int dex = idex;
+                    if (count == 0) {
+
+                        TextView be = (TextView) findViewById(R.id.tvBe);
+                        String x = Integer.toString(count);
+                        String edit = "" + be.getText();
+
+
+                        //final int idex = (int) (Math.random() * ((max - min) + 1));
+
+                        //this selectWord method should return the query results and display
+                        selectWord(db,dex);
+
+
+                        String verb = verbs.get(dex).getWord();
+                        be.setTypeface(null, Typeface.BOLD_ITALIC);
+                        be.setText("Be " + verb + ".");
+
+                        //verbadd();
+
+                        count++;
+                        //Toast.makeText(this,count  , Toast.LENGTH_LONG)
+                    } else {
+                        TextView be = (TextView)findViewById(R.id.tvBe);
+
+                        String edit = "" + be.getText();
+                        be.setText(verbs.get(dex).getDefinition());
+                        count = 0;
+                        idex = (int) (Math.random() * ((max - min) + 1));
+
+                        //define();
+                    }
+                }
+            });
+            displayCurrentRecords(db, tvBe);
+        }
+        catch (Exception E){
+            String er = E.toString();
+            Toast.makeText(this, er , Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
 
-        // Trigger the initial hide() shortly after the activity has been
-        // created, to briefly hint to the user that UI controls
-        // are available.
-        delayedHide(100);
+
+        //not sure how to fix this? This is new...
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
     }
 
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
-    private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (AUTO_HIDE) {
-                delayedHide(AUTO_HIDE_DELAY_MILLIS);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void addVerb(MySQLiteHelper db) {
+        //this will be an array of words. wanna do the whole list (200) and add them all here
+        int count = verbs.size();
+        Words[] word = new Words[5];
+        //Toast.makeText(this, "addverb db" , Toast.LENGTH_LONG).show();
+        for (int i = 0; i < 5; i++) {
+            Words temp = word[i];
+            temp = new Words();
+            word[0] = new Words(0, "Savvy.", "Comprehend or" + "\n" + "Understanding");
+            word[1] = new Words(1, "Thankful.", "feeling or showing thanks");
+            word[2] = new Words(2, "Grateful.", "appreciative of " + "\n" + "benefits received");
+            word[3] = new Words(3, "Selfless", "having no concern for self");
+            word[4] = new Words(4, "Rewarding", "giving satisfaction");
+
+            db.addVerb(word);
+
+        }
+    }
+
+    public void selectWord(MySQLiteHelper db,int dex ){
+
+
+
+        int in = dex;
+
+
+
+        result += db.selectWord(in);
+        // TextView test = (TextView)findViewById(R.id.tvr);
+        //test.setText(result);
+
+        Toast.makeText(this, "in selectWord", Toast.LENGTH_LONG).show();
+
+    }
+            /*word[]
+            ContentValues values = new ContentValues();
+            values.put(KEY_)*/
+
+
+    public void displayCurrentRecords(MySQLiteHelper db, TextView tvBe)
+    {
+        //Toast.makeText(this, "in displaycurrent" , Toast.LENGTH_LONG).show();
+        verbs.clear();
+        verbs = db.getVerb();
+        String strDisplay = "\n\n";
+        if (!verbs.isEmpty())
+        {
+            for (int i = 0; i < verbs.size(); i++)
+            {
+                //strDisplay += verbs.get(i).toString() + "\n";
             }
-            return false;
-        }
-    };
 
-    private void toggle() {
-        if (mVisible) {
-            hide();
-        } else {
-            show();
+            // tvPeople.setText(strDisplay);
+        }
+        else
+        {
+            tvBe.setText("");
         }
     }
 
-    private void hide() {
-        // Hide UI first
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
-        }
-        mControlsView.setVisibility(View.GONE);
-        mVisible = false;
 
-        // Schedule a runnable to remove the status and navigation bar after a delay
-        mHideHandler.removeCallbacks(mShowPart2Runnable);
-        mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
+
+    public void displayword(){
+
+        try {
+            int count = 0;
+            String x = Integer.toString(count);
+            TextView be = (TextView) findViewById(R.id.tvBe);
+
+            String edit = "" + be.getText();
+            String verb = "Aware";
+            be.setTypeface(null, Typeface.BOLD_ITALIC);
+            be.setText(edit + " Aware.");
+            count++;
+
+        }
+        catch(Exception e){
+            String er = e.toString();
+            Toast.makeText(this, er, Toast.LENGTH_LONG).show();
+        }
+
     }
+    public void define(){
+        TextView be = (TextView)findViewById(R.id.tvBe);
 
-    private final Runnable mHidePart2Runnable = new Runnable() {
-        @SuppressLint("InlinedApi")
-        @Override
-        public void run() {
-            // Delayed removal of status and navigation bar
+        String edit = "" + be.getText();
+        //be.setText(verbs.get(idex).getDefinition());
 
-            // Note that some of these constants are new as of API 16 (Jelly Bean)
-            // and API 19 (KitKat). It is safe to use them, as they are inlined
-            // at compile-time and do nothing on earlier devices.
-            mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-        }
-    };
 
-    @SuppressLint("InlinedApi")
-    private void show() {
-        // Show the system bar
-        mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        mVisible = true;
-
-        // Schedule a runnable to display UI elements after a delay
-        mHideHandler.removeCallbacks(mHidePart2Runnable);
-        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
-    }
-
-    private final Runnable mShowPart2Runnable = new Runnable() {
-        @Override
-        public void run() {
-            // Delayed display of UI elements
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.show();
-            }
-            mControlsView.setVisibility(View.VISIBLE);
-        }
-    };
-
-    private final Handler mHideHandler = new Handler();
-    private final Runnable mHideRunnable = new Runnable() {
-        @Override
-        public void run() {
-            hide();
-        }
-    };
-
-    /**
-     * Schedules a call to hide() in [delay] milliseconds, canceling any
-     * previously scheduled calls.
-     */
-    private void delayedHide(int delayMillis) {
-        mHideHandler.removeCallbacks(mHideRunnable);
-        mHideHandler.postDelayed(mHideRunnable, delayMillis);
     }
 }
