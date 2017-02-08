@@ -5,7 +5,7 @@
       "projectTypeName": "com.intel.xdk.projecttype.jsapp",
       "src": "jsapp/template-blank-cordova-project-lite/sample.zip",
       "projectGuid": "a0552f3a-79e6-4bc4-801d-5026b94eb455",
-      "lastModifiedDate": 1486534900870,
+      "lastModifiedDate": 1486537042567,
       "creationDate": 1486532960695
     },
     "XDK-app-designer": "false",
@@ -90,7 +90,7 @@
           "android-signed": true
         },
         "isActive_": true,
-        "certificateId_": "FPKLTBzKskKN-F0UqZABYw2",
+        "certificateId_": "",
         "appName_": "Be",
         "appID_": "xdk.intel.cordova.template.lite",
         "appAccess_": {

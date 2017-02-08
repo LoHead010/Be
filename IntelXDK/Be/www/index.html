@@ -3,6 +3,7 @@
 <!--
   * Please see the included README.md file for license terms and conditions.
   -->
+
 <head>
     <title>Blank Cordova Mobile App Project Template (Lite)</title>
     <meta http-equiv="Content-type" content="text/html; charset=utf-8">
@@ -12,18 +13,70 @@
     <style>
         /* following two viewport lines are equivalent to the meta viewport statement above, needed for Windows */
         /* see http://www.quirksmode.org/blog/archives/2014/05/html5_dev_conf.html and http://dev.w3.org/csswg/css-device-adapt/ */
-        @-ms-viewport { width: 100vw ; zoom: 100% ; }  @viewport { width: 100vw ; zoom: 100% ; }
-        @-ms-viewport { user-zoom: fixed ; }           @viewport { user-zoom: fixed ; }
+        
+        @-ms-viewport {
+            width: 100vw;
+            zoom: 100%;
+        }
+        
+        @viewport {
+            width: 100vw;
+            zoom: 100%;
+        }
+        
+        @-ms-viewport {
+            user-zoom: fixed;
+        }
+        
+        @viewport {
+            user-zoom: fixed;
+        }
     </style>
 
-    <script src="cordova.js"></script>          <!-- phantom library, needed for Cordova api calls, added during build -->
-    <script src="js/app.js"></script>           <!-- recommended location of your JavaScript code relative to other JS files -->
-    <script src="xdk/init-dev.js"></script>     <!-- normalizes device and document ready events, see README for details -->
+    <script src="cordova.js"></script>
+    <!-- phantom library, needed for Cordova api calls, added during build -->
+    <script src="js/app.js"></script>
+    <!-- recommended location of your JavaScript code relative to other JS files -->
+    <script src="xdk/init-dev.js"></script>
+    <!-- normalizes device and document ready events, see README for details -->
+    <script src="bower_components/jQuery/dist/jquery.min.js"></script>
 </head>
 
 <body>
 
-    <p>Be.</p>
-
+    <div id="dvContent">
+    </div>
+    <p id="verbArea">Be.</p>
+    <button id="changeVerbBtn" type="button">Search</button>
 </body>
+
+<script>
+    //Code Starts
+    $(document).ready(function () {
+
+        $("#dvContent").append("<ul></ul>");
+
+        $("#changeVerbBtn").click(function () {
+            $.ajax({
+
+                type: "GET",
+                //Code Starts
+                url: "http://www.dictionaryapi.com/api/v1/references/collegiate/xml/hypocrite?key=ec35adb7-3608-46fa-b540-6cf576853914",
+                dataType: "xml",
+                success: function (xml) {
+                    $(xml).find('entry').each(function () {
+                        var sTitle = $(this).find('ew').text();
+                        var sPublisher = $(this).find('dt').text();
+                        $("<li></li>").html(sTitle + " - " + sPublisher).appendTo("#dvContent ul");
+                    });
+                },
+                error: function () {
+                    alert("An error occurred while processing XML file.");
+                }
+            });
+        });
+    });
+    //Code Ends
+</script>
+
 </html>
